@@ -1,0 +1,15 @@
+@startuml consumer-auth-journey
+actor Consumer
+== Signup ==
+Consumer -> CustomerWebUI: 
+CustomerWebUI -> APIGateway: Hello!
+APIGateway -> UserAccountService: Hello!
+UserAccountService -> Auth0: Hello!
+
+== Login ==
+Consumer -> CustomerWebUI: 
+CustomerWebUI -> APIGateway: Hello!
+APIGateway -> UserAccountService: Hello!
+UserAccountService -> Auth0: Hello!
+
+@enduml
