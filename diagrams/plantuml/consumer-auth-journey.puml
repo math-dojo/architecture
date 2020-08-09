@@ -1,10 +1,21 @@
 @startuml consumer-auth-journey
+skinparam responseMessageBelowArrow true
+actor NewUser
 actor Consumer
-== Signup ==
-Consumer -> CustomerWebUI: 
-CustomerWebUI -> APIGateway: Hello!
-APIGateway -> UserAccountService: Hello!
-UserAccountService -> Auth0: Hello!
+
+== Default Org Signup ==
+NewUser -> CustomerWebUI: Signup to mtdj
+CustomerWebUI -> Auth0: GET *.auth0.com/signup
+Auth0 -> SocialProvider: OIDC Flow
+SocialProvider --> Auth0: OIDC Response
+Auth0 -> APIGateway: POST /user-account-service-*/organisations/{organisationId}/users
+APIGateway -> UserAccountService: POST /organisations/{organisationId}/users
+UserAccountService --> APIGateway: 201 Created
+APIGateway --> Auth0: 201 Created
+Auth0 --> Auth0: Add mtdj `consumer` claim to IDToken
+Auth0 --> CustomerWebUI: 200 OK & {IDToken}
+CustomerWebUI --> Consumer: Redirect to /dashboard
+
 
 == Login ==
 Consumer -> CustomerWebUI: 
