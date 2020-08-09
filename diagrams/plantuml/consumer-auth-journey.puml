@@ -4,7 +4,7 @@ actor NewUser
 actor Consumer
 
 == Default Org Signup ==
-NewUser -> CustomerWebUI: Signup to mtdj
+NewUser -> CustomerWebUI: Signup to mtdj - GET /signup
 CustomerWebUI -> Auth0: GET *.auth0.com/signup
 Auth0 -> SocialProvider: OIDC Flow
 SocialProvider --> Auth0: OIDC Response
