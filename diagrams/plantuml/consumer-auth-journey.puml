@@ -1,26 +1,35 @@
 @startuml consumer-auth-journey
 skinparam responseMessageBelowArrow true
-actor NewUser
+actor "New User" as N
 actor Consumer
 
-== Default Org Signup ==
-NewUser -> CustomerWebUI: Signup to mtdj - GET /signup
+== Signup to Default Org ==
+autonumber
+N -> CustomerWebUI: Signup to mtdj - GET /signup
 CustomerWebUI -> Auth0: GET *.auth0.com/signup
 Auth0 -> SocialProvider: OIDC Flow
 SocialProvider --> Auth0: OIDC Response
 Auth0 -> APIGateway: POST /user-account-service-*/organisations/{organisationId}/users
 APIGateway -> UserAccountService: POST /organisations/{organisationId}/users
-UserAccountService --> APIGateway: 201 Created
-APIGateway --> Auth0: 201 Created
-Auth0 --> Auth0: Add mtdj `consumer` claim to IDToken
+UserAccountService --> APIGateway: 201 Created {profile & permissions}
+APIGateway --> Auth0: 201 Created {profile & permissions}
+Auth0 --> Auth0: Add permissions from UserAccountService response\n as `permissons` claims to IDToken
 Auth0 --> CustomerWebUI: 200 OK & {IDToken}
 CustomerWebUI --> Consumer: Redirect to /dashboard
 
 
-== Login ==
-Consumer -> CustomerWebUI: 
-CustomerWebUI -> APIGateway: Hello!
-APIGateway -> UserAccountService: Hello!
-UserAccountService -> Auth0: Hello!
+== Login to Default Org ==
+autonumber
+Consumer -> CustomerWebUI: Login to mtdj - GET /login
+CustomerWebUI -> Auth0: GET *.auth0.com/login
+Auth0 -> SocialProvider: OIDC Flow
+SocialProvider --> Auth0: OIDC Response
+Auth0 -> APIGateway: GET /user-account-service-*/organisations/{organisationId}/users
+APIGateway -> UserAccountService: GET /organisations/{organisationId}/users
+UserAccountService --> APIGateway: 200 OK
+APIGateway --> Auth0: 200 OK {profile & permissions}
+Auth0 --> Auth0: Add permissions from UserAccountService response\n as `permissons` claims to IDToken
+Auth0 --> CustomerWebUI: 200 OK & {IDToken}
+CustomerWebUI --> Consumer: Redirect to /dashboard
 
 @enduml
