@@ -9,17 +9,16 @@ N -> CustomerWebUI: Signup to mtdj - GET /signup
 CustomerWebUI -> Auth0: GET *.auth0.com/signup
 Auth0 -> SocialProvider: OIDC Flow
 SocialProvider --> Auth0: OIDC Response
+Auth0 -> APIGateway: POST /user-account-service-*/organisations/{organisationId}/users
+APIGateway -> UserAccountService: POST /organisations/{organisationId}/users
 alt successful case
-    Auth0 -> APIGateway: POST /user-account-service-*/organisations/{organisationId}/users
-    APIGateway -> UserAccountService: POST /organisations/{organisationId}/users
     UserAccountService --> APIGateway: 201 Created {profile & permissions}
     APIGateway --> Auth0: 201 Created {profile & permissions}
     Auth0 --> Auth0: Add permissions from UserAccountService response\n as `permissons` claims to IDToken
     Auth0 --> CustomerWebUI: 200 OK & {IDToken}
     CustomerWebUI --> Consumer: Redirect to /dashboard
 else account creation failure
-autonumber 5
-    Auth0 -> APIGateway: POST /user-account-service-*/organisations/{organisationId}/users
+autonumber 7
     APIGateway -> UserAccountService: POST /organisations/{organisationId}/users
     UserAccountService --> APIGateway: 400|401|500 {error:""}
     APIGateway --> Auth0: 400|401|500 {error:""}
@@ -35,7 +34,7 @@ CustomerWebUI -> Auth0: GET *.auth0.com/login
 Auth0 -> SocialProvider: OIDC Flow
 SocialProvider --> Auth0: OIDC Response
 Auth0 -> APIGateway: GET /user-account-service-*/organisations/{organisationId}/users
-APIGateway -> UserAccountService: GET /organisations/{organisationId}/users
+APIGateway -> UserAccountService: GET /organisations/{organisationId}\n/users?id_token_ref={sub}@{issuer}
 alt successful account retrieval
     UserAccountService --> APIGateway: 200 OK
     APIGateway --> Auth0: 200 OK {profile & permissions}
@@ -43,7 +42,17 @@ alt successful account retrieval
     Auth0 --> CustomerWebUI: 200 OK & {IDToken}
     CustomerWebUI --> Consumer: Redirect to /dashboard
 else account not retrieved
+autonumber 7
+    UserAccountService --> APIGateway: 404 NotFound
+    APIGateway --> Auth0: 404 NotFound
+    Auth0 --> CustomerWebUI: Re-direct to mtdj error page
+    CustomerWebUI --> Consumer: Redirect to /login/error
 else account retrieval failure
+autonumber 7
+    UserAccountService --> APIGateway: 400|401|500 {error:""}
+    APIGateway --> Auth0: 400|401|500 {error:""}
+    Auth0 --> CustomerWebUI: Re-direct to mtdj error page
+    CustomerWebUI --> Consumer: Redirect to /login/error
 end
 
 @enduml
