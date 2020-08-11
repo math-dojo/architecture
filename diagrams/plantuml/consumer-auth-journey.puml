@@ -36,10 +36,14 @@ Auth0 -> SocialProvider: OIDC Flow
 SocialProvider --> Auth0: OIDC Response
 Auth0 -> APIGateway: GET /user-account-service-*/organisations/{organisationId}/users
 APIGateway -> UserAccountService: GET /organisations/{organisationId}/users
-UserAccountService --> APIGateway: 200 OK
-APIGateway --> Auth0: 200 OK {profile & permissions}
-Auth0 --> Auth0: Add permissions from UserAccountService response\n as `permissons` claims to IDToken
-Auth0 --> CustomerWebUI: 200 OK & {IDToken}
-CustomerWebUI --> Consumer: Redirect to /dashboard
+alt successful account retrieval
+    UserAccountService --> APIGateway: 200 OK
+    APIGateway --> Auth0: 200 OK {profile & permissions}
+    Auth0 --> Auth0: Add permissions from UserAccountService response\n as `permissons` claims to IDToken
+    Auth0 --> CustomerWebUI: 200 OK & {IDToken}
+    CustomerWebUI --> Consumer: Redirect to /dashboard
+else account not retrieved
+else account retrieval failure
+end
 
 @enduml
