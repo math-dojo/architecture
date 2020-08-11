@@ -46,13 +46,13 @@ autonumber 7
     UserAccountService --> APIGateway: 404 NotFound
     APIGateway --> Auth0: 404 NotFound
     Auth0 --> CustomerWebUI: Re-direct to mtdj error page
-    CustomerWebUI --> Consumer: Redirect to /login/error
+    CustomerWebUI --> Consumer: Redirect to /login/error\n "user not signed up?"
 else account retrieval failure
 autonumber 7
     UserAccountService --> APIGateway: 400|401|500 {error:""}
     APIGateway --> Auth0: 400|401|500 {error:""}
     Auth0 --> CustomerWebUI: Re-direct to mtdj error page
-    CustomerWebUI --> Consumer: Redirect to /login/error
+    CustomerWebUI --> Consumer: Redirect to /login/error\n "our fault, try again later?"
 end
 
 @enduml
